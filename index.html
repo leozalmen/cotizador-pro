@@ -6,14 +6,15 @@
   <title>Cotizador Pro</title>
   
   <!-- ======================================== -->
-  <!-- CONFIGURACIÓN PWA                         -->
+  <!-- CONFIGURACIÓN PWA (SIN SERVICE WORKER)   -->
   <!-- ======================================== -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIkNvdGl6YWRvciBQcm8iLAogICJzaG9ydF9uYW1lIjogIkNvdGl6YWRvciBQcm8iLAogICJkZXNjcmlwdGlvbiI6ICJDYWxjdWxhZG9yYSBkZSBwcmVjaW9zIHkgbWFyZ2VuIGRlIGdhbmFuY2lhIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZjk3MzE2IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9Jy45ZW0nIGZvbnQtc2l6ZT0nOTAnPuKcjDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
+  
   <meta name="theme-color" content="#f97316">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Cotizador Pro">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
   
   <!-- Estilos -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +32,7 @@
     html { scroll-behavior: smooth; }
     input:focus, select:focus { outline: none; }
     
-    /* Estilos para la PWA */
+    /* Estilos para el banner de instalación PWA */
     .pwa-install-banner {
       background: linear-gradient(135deg, #f97316, #ea580c);
       color: white;
@@ -172,7 +173,7 @@
             </div>
           </div>
 
-          <!-- Margen Real (integrado) -->
+          <!-- Margen Real -->
           <div class="mt-1 p-3 sm:p-4 rounded-xl bg-blue-50/50 border border-blue-200">
             <div class="flex items-center gap-2 mb-2 sm:mb-3">
               <i class="fa-solid fa-percent text-blue-500"></i>
@@ -307,50 +308,12 @@
     </div>
   </div>
 
-  <!-- ======================================== -->
-  <!-- ARCHIVO manifest.json (generado dinámicamente) -->
-  <!-- ======================================== -->
   <script>
     // ========================================
-    // GENERAR MANIFEST.JSON DINÁMICAMENTE
-    // ========================================
-    (function generateManifest() {
-      const manifest = {
-        name: "Cotizador Pro",
-        short_name: "Cotizador Pro",
-        description: "Calculadora de precios y margen de ganancia",
-        start_url: ".",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#f97316",
-        orientation: "portrait-primary",
-        icons: [
-          {
-            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E",
-            sizes: "192x192",
-            type: "image/svg+xml",
-            purpose: "any maskable"
-          }
-        ]
-      };
-      
-      // Crear un blob con el manifest
-      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      // Reemplazar el link del manifest
-      const link = document.querySelector('link[rel="manifest"]');
-      if (link) {
-        link.href = url;
-      }
-    })();
-
-    // ========================================
-    // PWA - INSTALACIÓN
+    // PWA - INSTALACIÓN (SIN SERVICE WORKER)
     // ========================================
     let deferredPrompt = null;
     const pwaBanner = document.getElementById('pwaBanner');
-    const installBtn = document.getElementById('installBtn');
 
     // Detectar si la app ya está instalada
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
@@ -704,16 +667,6 @@
         products.splice(index, 1);
         renderTable();
       }
-    }
-
-    // ========================================
-    // INICIALIZAR - Service Worker
-    // ========================================
-    if ('serviceWorker' in navigator) {
-      // Registrar service worker para caché offline
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Service Worker registrado'))
-        .catch(err => console.log('Error al registrar Service Worker:', err));
     }
 
     // ========================================
