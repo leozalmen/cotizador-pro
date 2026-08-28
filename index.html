@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Cotizador Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Mejoras para dispositivos móviles */
+    @media (max-width: 640px) {
+      .mobile-stack {
+        flex-direction: column !important;
+      }
+      .mobile-full {
+        width: 100% !important;
+      }
+      .mobile-text-sm {
+        font-size: 0.875rem !important;
+      }
+      .mobile-padding {
+        padding: 0.75rem !important;
+      }
+      input, select, button {
+        font-size: 16px !important; /* Evita zoom en iOS */
+      }
+    }
+    /* Scroll suave */
+    html {
+      scroll-behavior: smooth;
+    }
+    /* Mejora de contraste en inputs */
+    input:focus, select:focus {
+      outline: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+  <div class="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
+    
+    <!-- HEADER -->
+    <header class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4 sm:pb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-calculator text-orange-500 text-xl sm:text-2xl"></i> 
+          <span class="text-xl sm:text-3xl">Cotizador Pro</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Calcula el precio de venta exacto asegurando tu margen de ganancia real.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <span class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700">
+          <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 animate-pulse"></span> 
+          <span class="hidden xs:inline">Sistema Activo</span>
+          <span class="xs:hidden">Activo</span>
+        </span>
+        <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+          <i class="fa-solid fa-file-export"></i> 
+          <span class="hidden xs:inline">Exportar CSV</span>
+          <span class="xs:hidden">CSV</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- GRID PRINCIPAL -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
+      
+      <!-- FORMULARIO - COLUMNA IZQUIERDA -->
+      <div class="lg:col-span-5 bg-white p-4 sm:p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h2 id="formTitle" class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-tag text-orange-500"></i> Nuevo Producto
+        </h2>
+
+        <form id="productForm" class="space-y-3 sm:space-y-4">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nombre del producto</label>
+            <input type="text" id="prodName" required placeholder="ESCRIBE EL NOMBRE..." value="" class="w-full px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm uppercase" style="text-transform: uppercase;">
+          </div>
+
+          <!-- Costo + Stock -->
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Costo ($)</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3 text-slate-400 font-bold text-sm">$</span>
+                <input type="number" step="0.01" id="prodCost" required placeholder="0.00" value="0" class="w-full pl-6 sm:pl-7 pr-2 sm:pr-3 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Stock</label>
+              <input type="number" id="prodStock" min="0" value="0" class="w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm">
+            </div>
+          </div>
+
+          <!-- Categoría + Precio -->
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Categoría</label>
+              <select id="prodCategory" class="w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm bg-white">
+                <option>Carga / Energía</option>
+                <option>Audio</option>
+                <option>Accesorios</option>
+                <option>Perfumes</option>
+                <option>Repuestos</option>
+                <option>Autos</option>
+                <option>Otros</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Precio Venta ($)</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3 text-slate-400 font-bold text-sm">$</span>
+                <input type="number" step="0.01" id="prodPrice" required placeholder="0.00" value="0" class="w-full pl-6 sm:pl-7 pr-2 sm:pr-3 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm">
+              </div>
+            </div>
+          </div>
+
+          <!-- Margen Real (integrado) -->
+          <div class="mt-1 p-3 sm:p-4 rounded-xl bg-blue-50/50 border border-blue-200">
+            <div class="flex items-center gap-2 mb-2 sm:mb-3">
+              <i class="fa-solid fa-percent text-blue-500"></i>
+              <h3 class="text-[10px] sm:text-xs font-bold text-blue-800 uppercase tracking-wider">Margen Real</h3>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+              <div class="text-center sm:text-left">
+                <span class="text-[10px] sm:text-xs text-slate-500">Margen:</span>
+                <span id="marginResult" class="block text-base sm:text-lg font-bold text-blue-600">0.00%</span>
+              </div>
+              <div class="text-center sm:text-left">
+                <span class="text-[10px] sm:text-xs text-slate-500">Ganancia/u:</span>
+                <span id="marginProfit" class="block text-base sm:text-lg font-semibold text-green-600">$0.00</span>
+              </div>
+              <div class="text-center sm:text-left">
+                <span class="text-[10px] sm:text-xs text-slate-500">Markup:</span>
+                <span id="marginMarkup" class="block text-base sm:text-lg font-semibold text-blue-600">1.00x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumen del Producto -->
+          <div class="p-3 sm:p-4 rounded-xl bg-orange-50/50 border border-orange-100 space-y-2 sm:space-y-3">
+            <h3 class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase tracking-wider">Resumen del Producto</h3>
+
+            <div class="flex justify-between items-center text-xs sm:text-sm border-b border-orange-100 pb-1.5 sm:pb-2">
+              <span class="text-slate-600">Costo Unitario:</span>
+              <span id="displayCost" class="font-bold text-slate-800">$0.00</span>
+            </div>
+
+            <div class="flex justify-between items-center text-xs sm:text-sm border-b border-orange-100 pb-1.5 sm:pb-2">
+              <span class="text-slate-600">Precio de Venta:</span>
+              <span id="displayPrice" class="font-bold text-orange-600">$0.00</span>
+            </div>
+
+            <div class="flex justify-between items-center text-xs sm:text-sm">
+              <span class="text-slate-500">Ganancia Total:</span>
+              <span id="totalProfitAmount" class="font-semibold text-green-600">$0.00</span>
+            </div>
+
+            <div class="flex justify-between items-center text-xs sm:text-sm pt-1 border-t border-dashed border-orange-200">
+              <span class="text-slate-500">Costo Total Inversión:</span>
+              <span id="totalCostAmount" class="font-semibold text-blue-600">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Mensaje de error -->
+          <div id="errorMessage" class="hidden p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-xs sm:text-sm text-red-700 flex items-start gap-2">
+            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+            <span id="errorText">Por favor, completa todos los campos correctamente.</span>
+          </div>
+
+          <!-- Botones -->
+          <button type="submit" id="submitBtn" class="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl shadow transition duration-150 flex items-center justify-center gap-2 text-sm sm:text-base">
+            <i class="fa-solid fa-plus"></i> Guardar en Catálogo
+          </button>
+
+          <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="w-full hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl border border-gray-300 transition duration-150 flex items-center justify-center gap-2 text-xs sm:text-sm">
+            <i class="fa-solid fa-xmark"></i> Cancelar Edición
+          </button>
+        </form>
+      </div>
+
+      <!-- PANEL DERECHO -->
+      <div class="lg:col-span-7 space-y-4 sm:space-y-6">
+        
+        <!-- Vista previa -->
+        <div id="previewCard" class="bg-orange-50 p-3 sm:p-4 rounded-xl border border-orange-200 hidden">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase tracking-wider">Vista previa</span>
+            <span class="text-[10px] sm:text-xs text-orange-600" id="previewStatus">Nuevo producto</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-1 sm:gap-2 mt-1.5 sm:mt-2 text-xs sm:text-sm">
+            <div>
+              <span class="text-slate-500">Producto:</span>
+              <span id="previewName" class="font-semibold text-slate-800 ml-1">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Costo:</span>
+              <span id="previewCost" class="font-semibold text-slate-800 ml-1">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Precio:</span>
+              <span id="previewPrice" class="font-semibold text-orange-600 ml-1">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Ganancia/u:</span>
+              <span id="previewProfit" class="font-semibold text-green-600 ml-1">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Ganancia Total:</span>
+              <span id="previewTotalProfit" class="font-semibold text-green-600 ml-1">-</span>
+            </div>
+            <div>
+              <span class="text-slate-500">Stock:</span>
+              <span id="previewStock" class="font-semibold text-slate-800 ml-1">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de inventario -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-3 sm:p-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-2">
+            <h3 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-2">
+              <i class="fa-solid fa-boxes-stacked text-slate-400"></i> Inventario & Margen
+            </h3>
+            <span class="text-[10px] sm:text-xs text-slate-400" id="itemCountLabel">0 artículos</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs sm:text-sm text-slate-600">
+              <thead class="bg-slate-50 text-[10px] sm:text-xs uppercase font-semibold text-slate-400 border-b border-slate-100">
+                <tr>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3">Producto</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 hidden xs:table-cell">Costo</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3">Precio</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">Margen</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">Ganancia/u</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">Ganancia Total</th>
+                  <th class="px-2 sm:px-4 py-2 sm:py-3 text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody" class="divide-y divide-slate-100 font-normal">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // DATOS INICIALES - CATÁLOGO VACÍO
+    // ========================================
+    let products = [];
+    let editingIndex = null;
+
+    // ========================================
+    // ELEMENTOS DOM
+    // ========================================
+    const costInput = document.getElementById('prodCost');
+    const stockInput = document.getElementById('prodStock');
+    const priceInput = document.getElementById('prodPrice');
+    const nameInput = document.getElementById('prodName');
+    const displayCost = document.getElementById('displayCost');
+    const displayPrice = document.getElementById('displayPrice');
+    const totalProfitAmountElem = document.getElementById('totalProfitAmount');
+    const totalCostAmountElem = document.getElementById('totalCostAmount');
+    const marginResult = document.getElementById('marginResult');
+    const marginProfit = document.getElementById('marginProfit');
+    const marginMarkup = document.getElementById('marginMarkup');
+    const form = document.getElementById('productForm');
+    const formTitle = document.getElementById('formTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    const previewCard = document.getElementById('previewCard');
+    const previewName = document.getElementById('previewName');
+    const previewCost = document.getElementById('previewCost');
+    const previewPrice = document.getElementById('previewPrice');
+    const previewProfit = document.getElementById('previewProfit');
+    const previewTotalProfit = document.getElementById('previewTotalProfit');
+    const previewStock = document.getElementById('previewStock');
+    const previewStatus = document.getElementById('previewStatus');
+
+    // ========================================
+    // FUNCIONES PRINCIPALES
+    // ========================================
+
+    // Función para convertir a mayúsculas mientras se escribe
+    nameInput.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+
+    // Función para calcular el margen real
+    function calculateMarginReal() {
+      const cost = parseFloat(costInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
+
+      if (cost > 0 && price > 0 && price > cost) {
+        const profit = price - cost;
+        const margin = (profit / price) * 100;
+        const markup = price / cost;
+
+        marginResult.innerText = `${margin.toFixed(2)}%`;
+        marginProfit.innerText = `$${profit.toFixed(2)}`;
+        marginMarkup.innerText = `${markup.toFixed(2)}x`;
+      } else {
+        marginResult.innerText = '0.00%';
+        marginProfit.innerText = '$0.00';
+        marginMarkup.innerText = '1.00x';
+      }
+    }
+
+    // Verificar si el producto actual es válido
+    function isCurrentProductValid() {
+      const cost = parseFloat(costInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
+      const stock = parseInt(stockInput.value) || 0;
+      const name = nameInput.value.trim();
+      return cost > 0 && price > 0 && price > cost && stock > 0 && name.length > 0;
+    }
+
+    // Actualizar estadísticas en tiempo real
+    function updateStats() {
+      const cost = parseFloat(costInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
+      const stock = parseInt(stockInput.value) || 0;
+      const name = nameInput.value.trim();
+
+      const profit = price - cost;
+      const totalProfit = profit * stock;
+      const totalCost = cost * stock;
+      const isValid = isCurrentProductValid();
+      
+      // Actualizar resumen
+      displayCost.innerText = `$${cost.toFixed(2)}`;
+      displayPrice.innerText = `$${price.toFixed(2)}`;
+      totalProfitAmountElem.innerText = `$${totalProfit.toFixed(2)}`;
+      totalCostAmountElem.innerText = `$${totalCost.toFixed(2)}`;
+      
+      // Mostrar/ocultar preview
+      if (isValid) {
+        previewCard.classList.remove('hidden');
+        previewName.textContent = name;
+        previewCost.textContent = `$${cost.toFixed(2)}`;
+        previewPrice.textContent = `$${price.toFixed(2)}`;
+        previewProfit.textContent = `+$${profit.toFixed(2)}`;
+        previewTotalProfit.textContent = `+$${totalProfit.toFixed(2)}`;
+        previewStock.textContent = stock;
+        previewStatus.textContent = editingIndex !== null ? 'Editando' : 'Nuevo';
+        previewStatus.className = `text-[10px] sm:text-xs ${editingIndex !== null ? 'text-blue-600' : 'text-orange-600'}`;
+      } else {
+        previewCard.classList.add('hidden');
+      }
+
+      // Actualizar contador de productos en la tabla
+      const totalProducts = products.length + (isValid ? 1 : 0);
+      document.getElementById('itemCountLabel').innerText = `${totalProducts} artículos`;
+      
+      // Actualizar calculadora de margen real
+      calculateMarginReal();
+    }
+
+    // Eventos para actualizar en tiempo real
+    costInput.addEventListener('input', updateStats);
+    priceInput.addEventListener('input', updateStats);
+    stockInput.addEventListener('input', updateStats);
+    nameInput.addEventListener('input', updateStats);
+
+    // Renderizar tabla
+    function renderTable() {
+      const tbody = document.getElementById('productTableBody');
+      tbody.innerHTML = '';
+
+      if (products.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="px-2 sm:px-4 py-4 sm:py-8 text-center text-slate-400 text-xs">
+              No hay productos registrados
+            </td>
+          </tr>
+        `;
+      } else {
+        products.forEach((p, index) => {
+          const totalProfit = p.profit * p.stock;
+          const row = document.createElement('tr');
+          row.className = "hover:bg-slate-50 transition-colors";
+          row.innerHTML = `
+            <td class="px-2 sm:px-4 py-2 sm:py-3">
+              <div class="font-medium text-slate-800 text-xs sm:text-sm">${p.name}</div>
+              <div class="text-[10px] sm:text-xs text-slate-400">${p.category} • Stock: ${p.stock}</div>
+            </td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 font-mono text-slate-700 hidden xs:table-cell">$${p.cost.toFixed(2)}</td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 font-mono font-bold text-orange-600">$${p.price.toFixed(2)}</td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
+              <span class="inline-block px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                ${p.margin.toFixed(1)}%
+              </span>
+            </td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 font-mono text-slate-700 hidden sm:table-cell">+$${p.profit.toFixed(2)}</td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 font-mono text-green-600 font-bold hidden lg:table-cell">+$${totalProfit.toFixed(2)}</td>
+            <td class="px-2 sm:px-4 py-2 sm:py-3 text-right">
+              <button onclick="editProduct(${index})" class="text-slate-400 hover:text-blue-500 transition-colors mr-1 sm:mr-2 p-1" title="Editar">
+                <i class="fa-regular fa-pen-to-square text-xs sm:text-sm"></i>
+              </button>
+              <button onclick="deleteProduct(${index})" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Eliminar">
+                <i class="fa-regular fa-trash-can text-xs sm:text-sm"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      updateStats();
+    }
+
+    // Editar producto
+    function editProduct(index) {
+      const p = products[index];
+      
+      nameInput.value = p.name;
+      costInput.value = p.cost;
+      priceInput.value = p.price;
+      stockInput.value = p.stock;
+      document.getElementById('prodCategory').value = p.category;
+      
+      editingIndex = index;
+      
+      formTitle.innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-500"></i> Editar Producto';
+      submitBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Actualizar';
+      submitBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
+      submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
+      cancelBtn.classList.remove('hidden');
+      
+      updateStats();
+      document.querySelector('.lg\\:col-span-5').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Cancelar edición
+    function cancelEdit() {
+      editingIndex = null;
+      form.reset();
+      stockInput.value = 0;
+      nameInput.value = '';
+      costInput.value = 0;
+      priceInput.value = 0;
+      
+      formTitle.innerHTML = '<i class="fa-solid fa-tag text-orange-500"></i> Nuevo Producto';
+      submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Guardar en Catálogo';
+      submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
+      submitBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
+      cancelBtn.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+      updateStats();
+    }
+
+    // Exportar CSV
+    function exportCSV() {
+      if (products.length === 0) {
+        alert('No hay productos para exportar.');
+        return;
+      }
+
+      const headers = ['Nombre', 'Categoría', 'Costo', 'Precio Venta', 'Margen %', 'Ganancia/u', 'Stock', 'Ganancia Total', 'Costo Inversión'];
+      const rows = products.map(p => [
+        p.name,
+        p.category,
+        p.cost.toFixed(2),
+        p.price.toFixed(2),
+        p.margin.toFixed(1),
+        p.profit.toFixed(2),
+        p.stock,
+        (p.profit * p.stock).toFixed(2),
+        (p.cost * p.stock).toFixed(2)
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `catalogo_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // Guardar producto
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = nameInput.value.trim();
+      const cost = parseFloat(costInput.value);
+      const price = parseFloat(priceInput.value);
+      const stock = parseInt(stockInput.value) || 1;
+      const category = document.getElementById('prodCategory').value;
+
+      if (!name) {
+        errorText.innerText = 'Ingresa el nombre del producto.';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      if (isNaN(cost) || cost <= 0) {
+        errorText.innerText = 'Ingresa un costo válido mayor a 0.';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      if (isNaN(price) || price <= 0) {
+        errorText.innerText = 'Ingresa un precio de venta válido mayor a 0.';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      if (price <= cost) {
+        errorText.innerText = 'El precio debe ser mayor al costo.';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      errorMessage.classList.add('hidden');
+
+      const profit = price - cost;
+      const margin = (profit / price) * 100;
+
+      if (editingIndex !== null) {
+        products[editingIndex] = { name, category, cost, price, margin, profit, stock };
+        editingIndex = null;
+        cancelEdit();
+      } else {
+        products.push({ name, category, cost, price, margin, profit, stock });
+        form.reset();
+        stockInput.value = 0;
+        costInput.value = 0;
+        priceInput.value = 0;
+        nameInput.value = '';
+      }
+
+      renderTable();
+      updateStats();
+    });
+
+    // Eliminar producto
+    function deleteProduct(index) {
+      if (confirm(`¿Eliminar "${products[index].name}" del catálogo?`)) {
+        products.splice(index, 1);
+        renderTable();
+      }
+    }
+
+    // Inicializar
+    costInput.value = 0;
+    priceInput.value = 0;
+    stockInput.value = 0;
+    nameInput.value = '';
+    updateStats();
+    renderTable();
+  </script>
+</body>
+</html>
