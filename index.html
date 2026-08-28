@@ -4,34 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Cotizador Pro</title>
+  
+  <!-- ======================================== -->
+  <!-- CONFIGURACIÓN PWA                         -->
+  <!-- ======================================== -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f97316">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cotizador Pro">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  
+  <!-- Estilos -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     /* Mejoras para dispositivos móviles */
     @media (max-width: 640px) {
-      .mobile-stack {
-        flex-direction: column !important;
-      }
-      .mobile-full {
-        width: 100% !important;
-      }
-      .mobile-text-sm {
-        font-size: 0.875rem !important;
-      }
-      .mobile-padding {
-        padding: 0.75rem !important;
-      }
-      input, select, button {
-        font-size: 16px !important; /* Evita zoom en iOS */
-      }
+      .mobile-stack { flex-direction: column !important; }
+      .mobile-full { width: 100% !important; }
+      .mobile-text-sm { font-size: 0.875rem !important; }
+      .mobile-padding { padding: 0.75rem !important; }
+      input, select, button { font-size: 16px !important; }
     }
-    /* Scroll suave */
-    html {
-      scroll-behavior: smooth;
+    html { scroll-behavior: smooth; }
+    input:focus, select:focus { outline: none; }
+    
+    /* Estilos para la PWA */
+    .pwa-install-banner {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+      animation: slideDown 0.5s ease;
     }
-    /* Mejora de contraste en inputs */
-    input:focus, select:focus {
-      outline: none;
+    .pwa-install-banner.show { display: flex; }
+    .pwa-install-banner button {
+      background: white;
+      color: #f97316;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .pwa-install-banner button:hover { transform: scale(1.05); }
+    .pwa-install-banner .close-btn {
+      background: transparent;
+      color: white;
+      padding: 4px 8px;
+      font-size: 18px;
+    }
+    .pwa-install-banner .close-btn:hover { transform: scale(1.2); }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
   </style>
 </head>
@@ -39,12 +77,30 @@
 
   <div class="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
     
+    <!-- BANNER DE INSTALACIÓN PWA -->
+    <div id="pwaBanner" class="pwa-install-banner">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📊</span>
+        <div>
+          <div class="font-bold text-sm">Instalar Cotizador Pro</div>
+          <div class="text-xs opacity-90">Instala esta app para acceso rápido</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="installPWA()" id="installBtn">
+          <i class="fa-solid fa-download"></i> Instalar
+        </button>
+        <button onclick="closePWABanner()" class="close-btn">✕</button>
+      </div>
+    </div>
+
     <!-- HEADER -->
     <header class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4 sm:pb-6">
       <div>
         <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
           <i class="fa-solid fa-calculator text-orange-500 text-xl sm:text-2xl"></i> 
           <span class="text-xl sm:text-3xl">Cotizador Pro</span>
+          <span class="text-[10px] sm:text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-normal">PWA</span>
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">Calcula el precio de venta exacto asegurando tu margen de ganancia real.</p>
       </div>
@@ -251,7 +307,97 @@
     </div>
   </div>
 
+  <!-- ======================================== -->
+  <!-- ARCHIVO manifest.json (generado dinámicamente) -->
+  <!-- ======================================== -->
   <script>
+    // ========================================
+    // GENERAR MANIFEST.JSON DINÁMICAMENTE
+    // ========================================
+    (function generateManifest() {
+      const manifest = {
+        name: "Cotizador Pro",
+        short_name: "Cotizador Pro",
+        description: "Calculadora de precios y margen de ganancia",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#ffffff",
+        theme_color: "#f97316",
+        orientation: "portrait-primary",
+        icons: [
+          {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E",
+            sizes: "192x192",
+            type: "image/svg+xml",
+            purpose: "any maskable"
+          }
+        ]
+      };
+      
+      // Crear un blob con el manifest
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Reemplazar el link del manifest
+      const link = document.querySelector('link[rel="manifest"]');
+      if (link) {
+        link.href = url;
+      }
+    })();
+
+    // ========================================
+    // PWA - INSTALACIÓN
+    // ========================================
+    let deferredPrompt = null;
+    const pwaBanner = document.getElementById('pwaBanner');
+    const installBtn = document.getElementById('installBtn');
+
+    // Detectar si la app ya está instalada
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // Si ya está instalada o es iOS, ocultar el banner
+    if (isStandalone || isIOS) {
+      pwaBanner.classList.remove('show');
+    }
+
+    // Escuchar el evento beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaBanner.classList.add('show');
+    });
+
+    // Función para instalar
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('App instalada correctamente');
+            pwaBanner.classList.remove('show');
+          } else {
+            console.log('Instalación cancelada');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // Si no hay deferredPrompt, mostrar mensaje alternativo
+        alert('Para instalar esta app:\n\n1. Abre este sitio en Chrome\n2. Toca el menú (⋮)\n3. Selecciona "Instalar aplicación"\n\nO en Safari:\n1. Toca el botón compartir\n2. Selecciona "Agregar a pantalla de inicio"');
+      }
+    }
+
+    // Cerrar banner
+    function closePWABanner() {
+      pwaBanner.classList.remove('show');
+    }
+
+    // Detectar instalación en Chrome
+    window.addEventListener('appinstalled', () => {
+      pwaBanner.classList.remove('show');
+      console.log('App instalada exitosamente');
+    });
+
     // ========================================
     // DATOS INICIALES - CATÁLOGO VACÍO
     // ========================================
@@ -291,7 +437,7 @@
     // FUNCIONES PRINCIPALES
     // ========================================
 
-    // Función para convertir a mayúsculas mientras se escribe
+    // Función para convertir a mayúsculas
     nameInput.addEventListener('input', function() {
       this.value = this.value.toUpperCase();
     });
@@ -560,7 +706,19 @@
       }
     }
 
-    // Inicializar
+    // ========================================
+    // INICIALIZAR - Service Worker
+    // ========================================
+    if ('serviceWorker' in navigator) {
+      // Registrar service worker para caché offline
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.log('Error al registrar Service Worker:', err));
+    }
+
+    // ========================================
+    // INICIALIZAR - TODOS LOS CAMPOS EN CERO
+    // ========================================
     costInput.value = 0;
     priceInput.value = 0;
     stockInput.value = 0;
