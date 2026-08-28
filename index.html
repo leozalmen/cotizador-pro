@@ -6,7 +6,7 @@
   <title>Cotizador Pro</title>
   
   <!-- ======================================== -->
-  <!-- CONFIGURACIÓN PWA (SIN SERVICE WORKER)   -->
+  <!-- CONFIGURACIÓN PWA                        -->
   <!-- ======================================== -->
   <link rel="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIkNvdGl6YWRvciBQcm8iLAogICJzaG9ydF9uYW1lIjogIkNvdGl6YWRvciBQcm8iLAogICJkZXNjcmlwdGlvbiI6ICJDYWxjdWxhZG9yYSBkZSBwcmVjaW9zIHkgbWFyZ2VuIGRlIGdhbmFuY2lhIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZjk3MzE2IiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQtcHJpbWFyeSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9Jy45ZW0nIGZvbnQtc2l6ZT0nOTAnPuKcjDwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
   
@@ -16,23 +16,23 @@
   <meta name="apple-mobile-web-app-title" content="Cotizador Pro">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📊%3C/text%3E%3C/svg%3E">
   
+  <!-- ======================================== -->
+  <!-- FIREBASE SDK (versión compat)            -->
+  <!-- ======================================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
   <!-- Estilos -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Mejoras para dispositivos móviles */
     @media (max-width: 640px) {
-      .mobile-stack { flex-direction: column !important; }
-      .mobile-full { width: 100% !important; }
-      .mobile-text-sm { font-size: 0.875rem !important; }
-      .mobile-padding { padding: 0.75rem !important; }
       input, select, button { font-size: 16px !important; }
     }
     html { scroll-behavior: smooth; }
     input:focus, select:focus { outline: none; }
     
-    /* Estilos para el banner de instalación PWA */
     .pwa-install-banner {
       background: linear-gradient(135deg, #f97316, #ea580c);
       color: white;
@@ -67,7 +67,6 @@
       font-size: 18px;
     }
     .pwa-install-banner .close-btn:hover { transform: scale(1.2); }
-    
     @keyframes slideDown {
       from { transform: translateY(-20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
@@ -102,6 +101,7 @@
           <i class="fa-solid fa-calculator text-orange-500 text-xl sm:text-2xl"></i> 
           <span class="text-xl sm:text-3xl">Cotizador Pro</span>
           <span class="text-[10px] sm:text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-normal">PWA</span>
+          <span class="text-[10px] sm:text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-normal">☁️ Cloud</span>
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">Calcula el precio de venta exacto asegurando tu margen de ganancia real.</p>
       </div>
@@ -116,26 +116,27 @@
           <span class="hidden xs:inline">Exportar CSV</span>
           <span class="xs:hidden">CSV</span>
         </button>
+        <span id="cloudStatus" class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-yellow-100 text-yellow-700">
+          <i class="fa-solid fa-cloud"></i> Conectando...
+        </span>
       </div>
     </header>
 
     <!-- GRID PRINCIPAL -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
       
-      <!-- FORMULARIO - COLUMNA IZQUIERDA -->
+      <!-- FORMULARIO -->
       <div class="lg:col-span-5 bg-white p-4 sm:p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200">
         <h2 id="formTitle" class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-tag text-orange-500"></i> Nuevo Producto
         </h2>
 
         <form id="productForm" class="space-y-3 sm:space-y-4">
-          <!-- Nombre -->
           <div>
             <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nombre del producto</label>
             <input type="text" id="prodName" required placeholder="ESCRIBE EL NOMBRE..." value="" class="w-full px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-orange-500 text-sm uppercase" style="text-transform: uppercase;">
           </div>
 
-          <!-- Costo + Stock -->
           <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Costo ($)</label>
@@ -150,7 +151,6 @@
             </div>
           </div>
 
-          <!-- Categoría + Precio -->
           <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Categoría</label>
@@ -179,7 +179,6 @@
               <i class="fa-solid fa-percent text-blue-500"></i>
               <h3 class="text-[10px] sm:text-xs font-bold text-blue-800 uppercase tracking-wider">Margen Real</h3>
             </div>
-
             <div class="grid grid-cols-3 gap-2 sm:gap-3">
               <div class="text-center sm:text-left">
                 <span class="text-[10px] sm:text-xs text-slate-500">Margen:</span>
@@ -199,37 +198,45 @@
           <!-- Resumen del Producto -->
           <div class="p-3 sm:p-4 rounded-xl bg-orange-50/50 border border-orange-100 space-y-2 sm:space-y-3">
             <h3 class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase tracking-wider">Resumen del Producto</h3>
-
             <div class="flex justify-between items-center text-xs sm:text-sm border-b border-orange-100 pb-1.5 sm:pb-2">
               <span class="text-slate-600">Costo Unitario:</span>
               <span id="displayCost" class="font-bold text-slate-800">$0.00</span>
             </div>
-
             <div class="flex justify-between items-center text-xs sm:text-sm border-b border-orange-100 pb-1.5 sm:pb-2">
               <span class="text-slate-600">Precio de Venta:</span>
               <span id="displayPrice" class="font-bold text-orange-600">$0.00</span>
             </div>
-
             <div class="flex justify-between items-center text-xs sm:text-sm">
               <span class="text-slate-500">Ganancia Total:</span>
               <span id="totalProfitAmount" class="font-semibold text-green-600">$0.00</span>
             </div>
-
             <div class="flex justify-between items-center text-xs sm:text-sm pt-1 border-t border-dashed border-orange-200">
               <span class="text-slate-500">Costo Total Inversión:</span>
               <span id="totalCostAmount" class="font-semibold text-blue-600">$0.00</span>
             </div>
           </div>
 
-          <!-- Mensaje de error -->
           <div id="errorMessage" class="hidden p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg text-xs sm:text-sm text-red-700 flex items-start gap-2">
             <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
             <span id="errorText">Por favor, completa todos los campos correctamente.</span>
           </div>
 
-          <!-- Botones -->
           <button type="submit" id="submitBtn" class="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl shadow transition duration-150 flex items-center justify-center gap-2 text-sm sm:text-base">
             <i class="fa-solid fa-plus"></i> Guardar en Catálogo
+          </button>
+
+          <!-- BOTONES DE FIREBASE -->
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="guardarEnFirebase()" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cloud-upload-alt"></i> Guardar en Nube
+            </button>
+            <button type="button" onclick="cargarDesdeFirebase()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg text-xs sm:text-sm transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cloud-download-alt"></i> Cargar desde Nube
+            </button>
+          </div>
+
+          <button type="button" onclick="eliminarDeFirebase()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-3 rounded-lg border border-red-200 transition text-xs sm:text-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-trash-alt"></i> Eliminar datos de la nube
           </button>
 
           <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="w-full hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl border border-gray-300 transition duration-150 flex items-center justify-center gap-2 text-xs sm:text-sm">
@@ -241,41 +248,21 @@
       <!-- PANEL DERECHO -->
       <div class="lg:col-span-7 space-y-4 sm:space-y-6">
         
-        <!-- Vista previa -->
         <div id="previewCard" class="bg-orange-50 p-3 sm:p-4 rounded-xl border border-orange-200 hidden">
           <div class="flex justify-between items-center">
             <span class="text-[10px] sm:text-xs font-bold text-orange-800 uppercase tracking-wider">Vista previa</span>
             <span class="text-[10px] sm:text-xs text-orange-600" id="previewStatus">Nuevo producto</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-1 sm:gap-2 mt-1.5 sm:mt-2 text-xs sm:text-sm">
-            <div>
-              <span class="text-slate-500">Producto:</span>
-              <span id="previewName" class="font-semibold text-slate-800 ml-1">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Costo:</span>
-              <span id="previewCost" class="font-semibold text-slate-800 ml-1">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Precio:</span>
-              <span id="previewPrice" class="font-semibold text-orange-600 ml-1">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Ganancia/u:</span>
-              <span id="previewProfit" class="font-semibold text-green-600 ml-1">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Ganancia Total:</span>
-              <span id="previewTotalProfit" class="font-semibold text-green-600 ml-1">-</span>
-            </div>
-            <div>
-              <span class="text-slate-500">Stock:</span>
-              <span id="previewStock" class="font-semibold text-slate-800 ml-1">-</span>
-            </div>
+            <div><span class="text-slate-500">Producto:</span><span id="previewName" class="font-semibold text-slate-800 ml-1">-</span></div>
+            <div><span class="text-slate-500">Costo:</span><span id="previewCost" class="font-semibold text-slate-800 ml-1">-</span></div>
+            <div><span class="text-slate-500">Precio:</span><span id="previewPrice" class="font-semibold text-orange-600 ml-1">-</span></div>
+            <div><span class="text-slate-500">Ganancia/u:</span><span id="previewProfit" class="font-semibold text-green-600 ml-1">-</span></div>
+            <div><span class="text-slate-500">Ganancia Total:</span><span id="previewTotalProfit" class="font-semibold text-green-600 ml-1">-</span></div>
+            <div><span class="text-slate-500">Stock:</span><span id="previewStock" class="font-semibold text-slate-800 ml-1">-</span></div>
           </div>
         </div>
 
-        <!-- Tabla de inventario -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="p-3 sm:p-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-2">
             <h3 class="font-bold text-slate-800 text-xs sm:text-sm flex items-center gap-2">
@@ -297,8 +284,7 @@
                   <th class="px-2 sm:px-4 py-2 sm:py-3 text-right">Acción</th>
                 </tr>
               </thead>
-              <tbody id="productTableBody" class="divide-y divide-slate-100 font-normal">
-              </tbody>
+              <tbody id="productTableBody" class="divide-y divide-slate-100 font-normal"></tbody>
             </table>
           </div>
         </div>
@@ -310,59 +296,64 @@
 
   <script>
     // ========================================
-    // PWA - INSTALACIÓN (SIN SERVICE WORKER)
+    // CONFIGURACIÓN DE FIREBASE
+    // ========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIIjIQtVIqn5TMT5s6RWX_VUpi_5tC-s4",
+      authDomain: "cotizador-pro-33c54.firebaseapp.com",
+      projectId: "cotizador-pro-33c54",
+      storageBucket: "cotizador-pro-33c54.firebasestorage.app",
+      messagingSenderId: "796089845768",
+      appId: "1:796089845768:web:5a9fcf0d31ed06b7de69bd",
+      measurementId: "G-8D623KKJKR"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // ========================================
+    // PWA - INSTALACIÓN
     // ========================================
     let deferredPrompt = null;
     const pwaBanner = document.getElementById('pwaBanner');
-
-    // Detectar si la app ya está instalada
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // Si ya está instalada o es iOS, ocultar el banner
     if (isStandalone || isIOS) {
       pwaBanner.classList.remove('show');
     }
 
-    // Escuchar el evento beforeinstallprompt
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       pwaBanner.classList.add('show');
     });
 
-    // Función para instalar
     function installPWA() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            console.log('App instalada correctamente');
             pwaBanner.classList.remove('show');
-          } else {
-            console.log('Instalación cancelada');
           }
           deferredPrompt = null;
         });
       } else {
-        // Si no hay deferredPrompt, mostrar mensaje alternativo
-        alert('Para instalar esta app:\n\n1. Abre este sitio en Chrome\n2. Toca el menú (⋮)\n3. Selecciona "Instalar aplicación"\n\nO en Safari:\n1. Toca el botón compartir\n2. Selecciona "Agregar a pantalla de inicio"');
+        alert('Para instalar:\n\nChrome: Menú → "Instalar aplicación"\nSafari: Compartir → "Agregar a pantalla de inicio"');
       }
     }
 
-    // Cerrar banner
     function closePWABanner() {
       pwaBanner.classList.remove('show');
     }
 
-    // Detectar instalación en Chrome
     window.addEventListener('appinstalled', () => {
       pwaBanner.classList.remove('show');
-      console.log('App instalada exitosamente');
     });
 
     // ========================================
-    // DATOS INICIALES - CATÁLOGO VACÍO
+    // DATOS Y VARIABLES
     // ========================================
     let products = [];
     let editingIndex = null;
@@ -400,21 +391,17 @@
     // FUNCIONES PRINCIPALES
     // ========================================
 
-    // Función para convertir a mayúsculas
     nameInput.addEventListener('input', function() {
       this.value = this.value.toUpperCase();
     });
 
-    // Función para calcular el margen real
     function calculateMarginReal() {
       const cost = parseFloat(costInput.value) || 0;
       const price = parseFloat(priceInput.value) || 0;
-
       if (cost > 0 && price > 0 && price > cost) {
         const profit = price - cost;
         const margin = (profit / price) * 100;
         const markup = price / cost;
-
         marginResult.innerText = `${margin.toFixed(2)}%`;
         marginProfit.innerText = `$${profit.toFixed(2)}`;
         marginMarkup.innerText = `${markup.toFixed(2)}x`;
@@ -425,7 +412,6 @@
       }
     }
 
-    // Verificar si el producto actual es válido
     function isCurrentProductValid() {
       const cost = parseFloat(costInput.value) || 0;
       const price = parseFloat(priceInput.value) || 0;
@@ -434,25 +420,21 @@
       return cost > 0 && price > 0 && price > cost && stock > 0 && name.length > 0;
     }
 
-    // Actualizar estadísticas en tiempo real
     function updateStats() {
       const cost = parseFloat(costInput.value) || 0;
       const price = parseFloat(priceInput.value) || 0;
       const stock = parseInt(stockInput.value) || 0;
       const name = nameInput.value.trim();
-
       const profit = price - cost;
       const totalProfit = profit * stock;
       const totalCost = cost * stock;
       const isValid = isCurrentProductValid();
       
-      // Actualizar resumen
       displayCost.innerText = `$${cost.toFixed(2)}`;
       displayPrice.innerText = `$${price.toFixed(2)}`;
       totalProfitAmountElem.innerText = `$${totalProfit.toFixed(2)}`;
       totalCostAmountElem.innerText = `$${totalCost.toFixed(2)}`;
       
-      // Mostrar/ocultar preview
       if (isValid) {
         previewCard.classList.remove('hidden');
         previewName.textContent = name;
@@ -467,25 +449,19 @@
         previewCard.classList.add('hidden');
       }
 
-      // Actualizar contador de productos en la tabla
       const totalProducts = products.length + (isValid ? 1 : 0);
       document.getElementById('itemCountLabel').innerText = `${totalProducts} artículos`;
-      
-      // Actualizar calculadora de margen real
       calculateMarginReal();
     }
 
-    // Eventos para actualizar en tiempo real
     costInput.addEventListener('input', updateStats);
     priceInput.addEventListener('input', updateStats);
     stockInput.addEventListener('input', updateStats);
     nameInput.addEventListener('input', updateStats);
 
-    // Renderizar tabla
     function renderTable() {
       const tbody = document.getElementById('productTableBody');
       tbody.innerHTML = '';
-
       if (products.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -525,33 +501,26 @@
           tbody.appendChild(row);
         });
       }
-
       updateStats();
     }
 
-    // Editar producto
     function editProduct(index) {
       const p = products[index];
-      
       nameInput.value = p.name;
       costInput.value = p.cost;
       priceInput.value = p.price;
       stockInput.value = p.stock;
       document.getElementById('prodCategory').value = p.category;
-      
       editingIndex = index;
-      
       formTitle.innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-500"></i> Editar Producto';
       submitBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Actualizar';
       submitBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'active:bg-orange-700');
       submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
       cancelBtn.classList.remove('hidden');
-      
       updateStats();
       document.querySelector('.lg\\:col-span-5').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Cancelar edición
     function cancelEdit() {
       editingIndex = null;
       form.reset();
@@ -559,7 +528,6 @@
       nameInput.value = '';
       costInput.value = 0;
       priceInput.value = 0;
-      
       formTitle.innerHTML = '<i class="fa-solid fa-tag text-orange-500"></i> Nuevo Producto';
       submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Guardar en Catálogo';
       submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'active:bg-blue-700');
@@ -569,31 +537,18 @@
       updateStats();
     }
 
-    // Exportar CSV
     function exportCSV() {
       if (products.length === 0) {
         alert('No hay productos para exportar.');
         return;
       }
-
       const headers = ['Nombre', 'Categoría', 'Costo', 'Precio Venta', 'Margen %', 'Ganancia/u', 'Stock', 'Ganancia Total', 'Costo Inversión'];
       const rows = products.map(p => [
-        p.name,
-        p.category,
-        p.cost.toFixed(2),
-        p.price.toFixed(2),
-        p.margin.toFixed(1),
-        p.profit.toFixed(2),
-        p.stock,
-        (p.profit * p.stock).toFixed(2),
-        (p.cost * p.stock).toFixed(2)
+        p.name, p.category, p.cost.toFixed(2), p.price.toFixed(2),
+        p.margin.toFixed(1), p.profit.toFixed(2), p.stock,
+        (p.profit * p.stock).toFixed(2), (p.cost * p.stock).toFixed(2)
       ]);
-
-      const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.join(','))
-      ].join('\n');
-
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -605,10 +560,118 @@
       URL.revokeObjectURL(url);
     }
 
-    // Guardar producto
+    // ========================================
+    // FUNCIONES DE FIREBASE
+    // ========================================
+
+    async function guardarEnFirebase() {
+      if (products.length === 0) {
+        alert('⚠️ No hay productos para guardar.');
+        return;
+      }
+
+      const cloudStatus = document.getElementById('cloudStatus');
+      cloudStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+      cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-yellow-100 text-yellow-700';
+
+      try {
+        const timestamp = new Date().toISOString();
+        await db.collection('productos').add({
+          productos: products,
+          fecha: timestamp,
+          totalProductos: products.length,
+          totalUnidades: products.reduce((sum, p) => sum + p.stock, 0)
+        });
+        
+        cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Guardado ✅';
+        cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+        alert('✅ Datos guardados en la nube correctamente');
+        setTimeout(() => {
+          cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Conectado';
+          cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+        }, 3000);
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Error ❌';
+        cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700';
+        alert('❌ Error al guardar en la nube: ' + error.message);
+      }
+    }
+
+    async function cargarDesdeFirebase() {
+      const cloudStatus = document.getElementById('cloudStatus');
+      cloudStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando...';
+      cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-yellow-100 text-yellow-700';
+
+      try {
+        const querySnapshot = await db.collection('productos')
+          .orderBy('fecha', 'desc')
+          .limit(1)
+          .get();
+        
+        if (!querySnapshot.empty) {
+          const data = querySnapshot.docs[0].data();
+          products = data.productos || [];
+          renderTable();
+          updateStats();
+          
+          cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Cargado ✅';
+          cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+          alert(`✅ Datos cargados desde la nube (${products.length} productos)`);
+          setTimeout(() => {
+            cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Conectado';
+            cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+          }, 3000);
+        } else {
+          cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Sin datos';
+          cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-yellow-100 text-yellow-700';
+          alert('ℹ️ No hay datos guardados en la nube');
+          setTimeout(() => {
+            cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Conectado';
+            cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('Error al cargar:', error);
+        cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Error ❌';
+        cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700';
+        alert('❌ Error al cargar desde la nube: ' + error.message);
+      }
+    }
+
+    async function eliminarDeFirebase() {
+      if (!confirm('⚠️ ¿Eliminar TODOS los datos de la nube? Esta acción no se puede deshacer.')) return;
+      
+      const cloudStatus = document.getElementById('cloudStatus');
+      cloudStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+      cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700';
+
+      try {
+        const querySnapshot = await db.collection('productos').get();
+        querySnapshot.forEach(async (doc) => {
+          await db.collection('productos').doc(doc.id).delete();
+        });
+        
+        cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Eliminado ✅';
+        cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+        alert('✅ Datos eliminados de la nube');
+        setTimeout(() => {
+          cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Conectado';
+          cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
+        }, 3000);
+      } catch (error) {
+        console.error('Error al eliminar:', error);
+        cloudStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Error ❌';
+        cloudStatus.className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700';
+        alert('❌ Error al eliminar de la nube: ' + error.message);
+      }
+    }
+
+    // ========================================
+    // INICIALIZAR
+    // ========================================
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
       const name = nameInput.value.trim();
       const cost = parseFloat(costInput.value);
       const price = parseFloat(priceInput.value);
@@ -620,25 +683,21 @@
         errorMessage.classList.remove('hidden');
         return;
       }
-
       if (isNaN(cost) || cost <= 0) {
         errorText.innerText = 'Ingresa un costo válido mayor a 0.';
         errorMessage.classList.remove('hidden');
         return;
       }
-
       if (isNaN(price) || price <= 0) {
         errorText.innerText = 'Ingresa un precio de venta válido mayor a 0.';
         errorMessage.classList.remove('hidden');
         return;
       }
-
       if (price <= cost) {
         errorText.innerText = 'El precio debe ser mayor al costo.';
         errorMessage.classList.remove('hidden');
         return;
       }
-
       errorMessage.classList.add('hidden');
 
       const profit = price - cost;
@@ -656,12 +715,10 @@
         priceInput.value = 0;
         nameInput.value = '';
       }
-
       renderTable();
       updateStats();
     });
 
-    // Eliminar producto
     function deleteProduct(index) {
       if (confirm(`¿Eliminar "${products[index].name}" del catálogo?`)) {
         products.splice(index, 1);
@@ -670,7 +727,7 @@
     }
 
     // ========================================
-    // INICIALIZAR - TODOS LOS CAMPOS EN CERO
+    // INICIALIZAR
     // ========================================
     costInput.value = 0;
     priceInput.value = 0;
@@ -678,6 +735,10 @@
     nameInput.value = '';
     updateStats();
     renderTable();
+
+    // Estado de conexión a Firebase
+    document.getElementById('cloudStatus').innerHTML = '<i class="fa-solid fa-cloud"></i> Conectado';
+    document.getElementById('cloudStatus').className = 'inline-flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-100 text-green-700';
   </script>
 </body>
 </html>
